@@ -1,26 +1,87 @@
 @import "tailwindcss";
 
+/* ── Design tokens ───────────────────────────────────────────────────────── */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --void:    #0C0C0E;
+  --panel:   #141416;
+  --surface: #1C1C1F;
+  --edge:    #2A2A2E;
+  --text:    #E8E8EC;
+  --dim:     #5A5A62;
+  --accent:  #C8FF00;
+  --accent-dim: #9ac500;
+  --danger:  #FF4D4F;
+  --online:  #22C55E;
+  --offline: #5A5A62;
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
+  --color-background: var(--void);
+  --color-foreground: var(--text);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+/* ── Base resets ─────────────────────────────────────────────────────────── */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html, body {
+  height: 100%;
+  overflow: hidden;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--void);
+  color: var(--text);
+  font-family: var(--font-geist-mono), "Geist Mono", "Courier New", monospace;
+  font-size: 13px;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ── Scrollbars ──────────────────────────────────────────────────────────── */
+::-webkit-scrollbar {
+  width: 4px;
+  height: 4px;
+}
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb {
+  background: var(--edge);
+  border-radius: 2px;
+}
+::-webkit-scrollbar-thumb:hover { background: var(--dim); }
+
+/* ── Selection ───────────────────────────────────────────────────────────── */
+::selection {
+  background: var(--accent);
+  color: var(--void);
+}
+
+/* ── Keyframes ───────────────────────────────────────────────────────────── */
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes slideIn {
+  from { opacity: 0; transform: translateX(-8px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
 }
