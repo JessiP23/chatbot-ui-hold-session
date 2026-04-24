@@ -7,9 +7,7 @@ import MessageThread from "./components/MessageThread";
 import ReplyBox from "./components/ReplyBox";
 import type { AgentStatus } from "./types";
 
-const BACKEND_URL =
-  process.env.NEXT_PUBLIC_BACKEND_URL ??
-  "https://wm-chatbot-api.fly.dev/api/v1";
+const BACKEND_URL = "https://wm-chatbot-api.fly.dev/api/v1";
 
 // ── Status helpers ────────────────────────────────────────────────────────────
 const STATUS_DOT: Record<AgentStatus, string> = {
@@ -79,8 +77,10 @@ export default function DashboardPage() {
   // ── Derived state ─────────────────────────────────────────────────────────
   const sortedSessions = useMemo(() => {
     return [...sessions].sort((a, b) => {
-      // Online first, then by most recent activity
-      if (a.online !== b.online) return a.online ? -1 : 1;
+      // Active+online first, then active+offline, then closed
+      const scoreA = a.status === "active" ? (a.online ? 3 : 2) : 1;
+      const scoreB = b.status === "active" ? (b.online ? 3 : 2) : 1;
+      if (scoreA !== scoreB) return scoreB - scoreA;
       return (b.last_ts || b.created_at) - (a.last_ts || a.created_at);
     });
   }, [sessions]);
@@ -191,10 +191,17 @@ export default function DashboardPage() {
                 )}
                 <span style={{
                   fontSize: 9, fontWeight: 700, letterSpacing: "0.12em",
-                  color: "var(--text)", background: "var(--surface)",
+                  color: "var(--online)", background: "rgba(34,197,94,0.1)",
                   borderRadius: 4, padding: "2px 7px",
                 }}>
-                  {sessions.filter(s => s.online).length}/{sessions.length}
+                  {sessions.filter(s => s.status === "active").length} LIVE
+                </span>
+                <span style={{
+                  fontSize: 9, fontWeight: 700, letterSpacing: "0.12em",
+                  color: "var(--dim)", background: "var(--surface)",
+                  borderRadius: 4, padding: "2px 7px",
+                }}>
+                  {sessions.length} TOTAL
                 </span>
               </div>
             </div>

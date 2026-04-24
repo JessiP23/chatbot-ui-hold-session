@@ -8,6 +8,7 @@ export interface SessionSummary {
   last_role: "user" | "assistant" | "";
   last_ts: number;      // unix ms of last message
   online: boolean;      // customer WebSocket still open
+  status: "active" | "closed";
 }
 
 export interface Message {

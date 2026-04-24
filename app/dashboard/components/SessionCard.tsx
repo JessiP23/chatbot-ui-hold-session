@@ -14,11 +14,14 @@ function timeAgo(ms: number): string {
   const diff = Math.floor((Date.now() - ms) / 1000);
   if (diff < 60) return `${diff}s ago`;
   if (diff < 3600) return `${Math.floor(diff / 60)}m ago`;
-  return `${Math.floor(diff / 3600)}h ago`;
+  if (diff < 86400) return `${Math.floor(diff / 3600)}h ago`;
+  return `${Math.floor(diff / 86400)}d ago`;
 }
 
 export default function SessionCard({ session, isActive, unreadCount, onClick }: SessionCardProps) {
   const shortId = session.session_id.replace(/^sess_/, "").slice(0, 12);
+  const isLive = session.status === "active" && session.online;
+  const isClosed = session.status === "closed";
 
   return (
     <button
@@ -31,11 +34,12 @@ export default function SessionCard({ session, isActive, unreadCount, onClick }:
         width: "100%",
         cursor: "pointer",
         padding: "14px 16px",
-        borderLeft: `2px solid ${isActive ? "var(--accent)" : "transparent"}`,
+        borderLeft: `2px solid ${isActive ? "var(--accent)" : isLive ? "var(--online)" : "transparent"}`,
         background: isActive ? "var(--surface)" : "transparent",
         borderBottom: "1px solid var(--edge)",
         transition: "background 0.15s ease, border-color 0.15s ease",
         animation: "slideIn 0.2s cubic-bezier(0.16,1,0.3,1)",
+        opacity: isClosed && !isActive ? 0.6 : 1,
       }}
       onMouseEnter={(e) => {
         if (!isActive) e.currentTarget.style.background = "rgba(28,28,31,0.6)";
@@ -44,17 +48,17 @@ export default function SessionCard({ session, isActive, unreadCount, onClick }:
         if (!isActive) e.currentTarget.style.background = "transparent";
       }}
     >
-      {/* Top row: status + ID + unread badge */}
+      {/* Top row: status + ID + badges */}
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 5 }}>
         <div style={{ display: "flex", alignItems: "center", gap: 7 }}>
-          {/* Online indicator */}
+          {/* Online/status indicator */}
           <span
-            title={session.online ? "Customer online" : "Customer offline"}
+            title={isLive ? "Customer online" : isClosed ? "Session closed" : "Customer offline"}
             style={{
               width: 7, height: 7, borderRadius: "50%", flexShrink: 0,
-              background: session.online ? "var(--online)" : "var(--offline)",
-              boxShadow: session.online ? "0 0 0 2px rgba(34,197,94,0.25)" : "none",
-              animation: session.online ? "pulse 2s ease-in-out infinite" : "none",
+              background: isLive ? "var(--online)" : isClosed ? "var(--offline)" : "#F59E0B",
+              boxShadow: isLive ? "0 0 0 2px rgba(34,197,94,0.25)" : "none",
+              animation: isLive ? "pulse 2s ease-in-out infinite" : "none",
             }}
           />
           <span style={{
@@ -63,6 +67,16 @@ export default function SessionCard({ session, isActive, unreadCount, onClick }:
             fontFamily: "inherit",
           }}>
             {shortId}
+          </span>
+          {/* Status badge */}
+          <span style={{
+            fontSize: 8, fontWeight: 800, letterSpacing: "0.12em",
+            textTransform: "uppercase",
+            padding: "1px 5px", borderRadius: 3,
+            background: isLive ? "rgba(34,197,94,0.15)" : isClosed ? "rgba(90,90,98,0.15)" : "rgba(245,158,11,0.15)",
+            color: isLive ? "var(--online)" : isClosed ? "var(--dim)" : "#F59E0B",
+          }}>
+            {isLive ? "LIVE" : isClosed ? "CLOSED" : "AWAY"}
           </span>
         </div>
         {unreadCount > 0 && (
@@ -92,7 +106,7 @@ export default function SessionCard({ session, isActive, unreadCount, onClick }:
           {session.message_count} {session.message_count === 1 ? "msg" : "msgs"}
         </span>
         <span style={{ fontSize: 9, color: "var(--dim)", letterSpacing: "0.06em" }}>
-          {timeAgo(session.last_ts)}
+          {timeAgo(session.last_ts || session.created_at)}
         </span>
       </div>
     </button>
