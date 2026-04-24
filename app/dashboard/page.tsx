@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
 import { useAgentSocket } from "./hooks/useAgentSocket";
 import SessionCard from "./components/SessionCard";
 import MessageThread from "./components/MessageThread";
@@ -28,6 +29,12 @@ const STATUS_LABEL: Record<AgentStatus, string> = {
 export default function DashboardPage() {
   const socket = useAgentSocket();
   const { status, sessions, histories, sendReply, sendTyping, connect } = socket;
+  const router = useRouter();
+
+  async function handleLogout() {
+    await fetch("/api/auth/logout", { method: "POST" });
+    router.push("/login");
+  }
 
   const [activeSessionId, setActiveSessionId] = useState<string | null>(null);
   const [unread, setUnread] = useState<Record<string, number>>({});
@@ -131,7 +138,7 @@ export default function DashboardPage() {
             </span>
           </div>
 
-          {/* Right side: status */}
+          {/* Right side: status + logout */}
           <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
             {/* Connection status */}
             <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
@@ -151,6 +158,34 @@ export default function DashboardPage() {
             <span style={{ fontSize: 9, color: "var(--dim)", letterSpacing: "0.08em" }}>
               {sessions.length} session{sessions.length !== 1 ? "s" : ""}
             </span>
+
+            {/* Sign out */}
+            <button
+              onClick={handleLogout}
+              style={{
+                all: "unset",
+                cursor: "pointer",
+                fontSize: 9,
+                fontWeight: 700,
+                letterSpacing: "0.14em",
+                color: "var(--dim)",
+                textTransform: "uppercase",
+                padding: "4px 8px",
+                border: "1px solid var(--edge)",
+                borderRadius: 4,
+                transition: "color 0.2s ease, border-color 0.2s ease",
+              }}
+              onMouseEnter={(e) => {
+                (e.currentTarget as HTMLButtonElement).style.color = "var(--danger)";
+                (e.currentTarget as HTMLButtonElement).style.borderColor = "var(--danger)";
+              }}
+              onMouseLeave={(e) => {
+                (e.currentTarget as HTMLButtonElement).style.color = "var(--dim)";
+                (e.currentTarget as HTMLButtonElement).style.borderColor = "var(--edge)";
+              }}
+            >
+              SIGN OUT
+            </button>
           </div>
         </header>
 
