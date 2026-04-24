@@ -1,7 +1,5 @@
 import { z } from "zod";
-import bcrypt from "bcryptjs";
 
-/** Zod schema — validates and sanitises the login form body */
 export const loginSchema = z.object({
   username: z
     .string()
@@ -25,13 +23,13 @@ export async function validateCredentials(
   password: string
 ): Promise<boolean> {
   const validUsername = process.env.AGENT_USERNAME;
-  const validHash = process.env.AGENT_PASSWORD_HASH;
+  const validHash = process.env.PASSWORD;
 
   console.log("Debug (auth.ts): AGENT_USERNAME =", validUsername); // SERVER-SIDE DEBUG LOG
-  console.log("Debug (auth.ts): AGENT_PASSWORD_HASH =", validHash); // SERVER-SIDE DEBUG LOG
+  console.log("Debug (auth.ts): AGENT_PASSWORD =", validHash); // SERVER-SIDE DEBUG LOG
 
   if (!validUsername || !validHash) {
-    console.error("[Auth] AGENT_USERNAME / AGENT_PASSWORD_HASH not set");
+    console.error("[Auth] AGENT_USERNAME / AGENT_PASSWORD not set");
     return false;
   }
 
@@ -43,5 +41,5 @@ export async function validateCredentials(
   }
   if (usernameMismatch !== 0) return false;
 
-  return bcrypt.compare(password, validHash);
+  return password === validHash;
 }
